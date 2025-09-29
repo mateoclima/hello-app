@@ -38,8 +38,8 @@ jobs:
           context: .
           push: true
           tags: |
-            mateoclima/hello-app:${{ github.sha }}
-            mateoclima/hello-app:latest
+            mateolima/hello-app:${{ github.sha }}
+            mateolima/hello-app:latest
 
   update-manifest:
     needs: build-and-push  # Só roda se o build-and-push tiver sucesso
