@@ -4,6 +4,8 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build-and-push:
@@ -33,13 +35,11 @@ jobs:
       # - uma única (sha do commit)
       # - e "latest" (para sempre apontar para a versão mais nova)
       - name: Build and push Docker image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v2
         with:
           context: .
           push: true
-          tags: |
-            mateolima/hello-app:${{ github.sha }}
-            mateolima/hello-app:latest
+          tags: mateolima/hello-app:${{ github.sha }}
 
   update-manifest:
     needs: build-and-push  # Só roda se o build-and-push tiver sucesso
