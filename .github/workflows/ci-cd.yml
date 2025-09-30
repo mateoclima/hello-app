@@ -61,7 +61,8 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
+          token: ${{ secrets.GH_PAT }}
           branch: update-image-${{ github.sha }}
           commit-message: "Update image to ${{ github.sha }}"
           title: "Update image to ${{ github.sha }}"
-          body: "Atualizando a imagem no deployment para a versão do commit ${{ github.sha }}"
+          body: "Atualizando imagem no deployment para a versão do commit ${{ github.sha }}"
