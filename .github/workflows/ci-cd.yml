@@ -1,6 +1,6 @@
 name: CI/CD Pipeline
 
-# Dispara o workflow quando houver push na branch main
+# Dispara o workflow quando houver push ou PR na branch main
 on:
   push:
     branches: [ "main" ]
@@ -26,14 +26,11 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Roda testes automatizados antes de buildar (ex.: FastAPI + pytest)
+      # Roda testes automatizados antes de buildar
       - name: Run tests
         run: pytest || echo "Sem testes configurados ainda"
 
       # Builda e faz push da imagem Docker para o Docker Hub
-      # Cria duas tags:
-      # - uma única (sha do commit)
-      # - e "latest" (para sempre apontar para a versão mais nova)
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
@@ -42,27 +39,30 @@ jobs:
           tags: mateolima/hello-app:${{ github.sha }}
 
   update-manifest:
-    needs: build-and-push  # Só roda se o build-and-push tiver sucesso
+    needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      # Faz checkout do repositório de manifests (infra usada pelo ArgoCD)
+      # Faz checkout do repositório de manifests usando GH_PAT
       - name: Checkout manifests repository
         uses: actions/checkout@v3
         with:
           repository: mateoclima/hello-manifests
-          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          token: ${{ secrets.GH_PAT }}
+          path: manifests
 
       # Atualiza a imagem no arquivo deployment.yaml
       - name: Update image tag in deployment
         run: |
-          sed -i "s|image: .*|image: mateolima/hello-app:${{ github.sha }}|" deployment.yaml
+          sed -i "s|image: .*|image: mateolima/hello-app:${{ github.sha }}|" manifests/deployment.yaml
 
-      # Cria automaticamente um Pull Request no repositório de manifests(não fazer push direto)
+      # Cria automaticamente um Pull Request no repositório de manifests
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GH_PAT }}
-          branch: update-image-${{ github.sha }}
           commit-message: "Update image to ${{ github.sha }}"
           title: "Update image to ${{ github.sha }}"
           body: "Atualizando imagem no deployment para a versão do commit ${{ github.sha }}"
+          branch: update-image-${{ github.sha }}
+          base: main
+          path: manifests
