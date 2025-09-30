@@ -409,14 +409,6 @@ argocd app get hello-app
 - Confirmar serviço expondo a porta correta
 - Checar logs dos pods para erros
 
-## 📈 Próximos Passos e Melhorias
-
-1. Adicionar testes automatizados
-2. Implementar ambientes (dev/staging/prod)
-3. Adicionar monitoramento e alertas
-4. Implementar rollback automático
-5. Adicionar segurança no pipeline (scan de vulnerabilidades)
-
 ## 👥 Autor
 
 - Matheus José 
